@@ -1,0 +1,492 @@
+Main.createNotifyIcon();
+
+/*
+with(require('Keyboard')){
+	for each(let [n,v] in Iterator(Keyboard.codes)){
+		println('Alias: '+(n+'                ').slice(0,16)
+				+' / Code: 0x'+(('0'+v.toString(16)).slice(-2))
+				+' / ScanCode: 0x'+(('00'+(new Key(n)).scanCode.toString(16)).slice(-3))
+				+' / Name: '+(new Key(n)).name);
+	}
+	
+	Keyboard.observe('down',function(obj){
+		println((obj.injected?'+':' ')+'DOWN / Code: 0x'+(('0'+obj.key.code.toString(16)).slice(-2))
+				+' / ScanCode: 0x'+(('00'+obj.key.scanCode.toString(16)).slice(-3))
+				+' / Name: '+obj.key.name);
+	});
+	Keyboard.observe('up',function(obj){
+		println((obj.injected?'+':' ')+'  UP  / Code: 0x'+(('0'+obj.key.code.toString(16)).slice(-2))
+				+' / ScanCode: 0x'+(('00'+obj.key.scanCode.toString(16)).slice(-3))
+				+' / Name: '+obj.key.name);
+	});
+	
+}
+*/
+
+(function () {
+	for (var p in Process.select('ngw.exe')) {
+		if (p.id === Main.process.id) {
+			continue;
+		};
+		p.terminate();
+	}
+})();
+
+Main.observe("exit",function()println("main thread is  correctly terminating"));
+println=function(s)(Thread.create(function()Main.stdout.writeLine(s)));
+Main.process.priority=Process.priority.high;
+var Window=require("Window").Window;
+var Clipboard=require('Clipboard').Clipboard;
+
+var Ctrl_Shift = {
+	'Z':function()( this.cancel().reset().send('Ctrl+Y') ),
+	'C':function() {
+		this.IMETurnOff().cancel().reset()
+			.send('[home][enter][up]')
+			.send(['console.debug();'])
+			.send('[left][left]')
+		;
+	},
+	'D':function() {
+		this.IMETurnOff().cancel().reset()
+			.send('[home][enter][up]')
+			.send(['debugger;'])
+		;
+	},
+	'F':function() {
+		this.IMETurnOff().cancel().reset()
+			.send(['function () {}'])
+			.send('[left]')
+		;
+	},
+	'J':function()( this.IMETurnOff().cancel().reset().send(['JavaScript']) ),
+	'A':function()( this.IMETurnOff().cancel().reset().send(['arguments']) ),
+	'U':function()( this.IMETurnOff().cancel().reset().send(['undefined']) ),
+	'R':function()( this.IMETurnOff().cancel().reset().send(['return']) ),
+	'V':function()( this.IMETurnOff().cancel().reset().send(['var ']) ),
+	'L':function()( this.IMETurnOff().cancel().reset().send(['.length']) ),
+	'S':function() {
+		this.IMETurnOff().cancel().reset()
+			.send(['setTimeout(function () {});'])
+			.send('left*3')
+			.send('[enter]')
+		;
+	},
+	'_':function()( this.IMETurnOff().cancel().reset().send(['var self = this;']) ),
+	'T':function()( this.IMETurnOff().cancel().reset().send(['this']) ),
+	'Q':function()( this.IMETurnOff().cancel().reset().send(['jQuery']) ),
+	'E':function()( this.IMETurnOff().cancel().reset().send(['.preventDefault();']) ),
+	'I':function() {
+		this.IMETurnOff().cancel().reset()
+			.send(['if () {}'])
+			.send('[left][enter][up]')
+			.send('right*4')
+		;
+	},
+	'O':function() {
+		this.IMETurnOff().cancel().reset()
+			.send(['console.log();'])
+			.send('left*2')
+		;
+	},
+	'B':function() {
+		this.IMETurnOff().cancel().reset()
+			.send(['.bind(this)'])
+		;
+	},
+	'W':function () {
+		makeZip(
+			'C:\\Users\\kyo\\Desktop\\klepto.zip',
+			'C:\\works\\home\\klepto\\'
+		);
+		makeZip(
+			'C:\\Users\\kyo\\Desktop\\extension.zip',
+			'C:\\works\\home\\klepto-extension\\'
+		);
+		function makeZip (zip_name, dir_name) {
+			var zip = require('ZLib').ZIP.create(zip_name);
+			var dir = new Directory(dir_name);
+			for (d in dir.children) {
+				if (d.name.match(/^\./)) {
+					continue;
+				}
+				zip.add(d);
+			}
+			zip.free();
+		}
+	},
+};
+
+var shift_ = {
+	// () <=> <>
+	'8' : 'Shift+,',
+	'9' : 'Shift+.',
+	',' : 'Shift+8',
+	'.' : 'Shift+9',
+};
+
+require('Hotstrokes').Hotstrokes.use('IME').defineConditions({
+	'Browser' : function () {
+		if (~[
+			'MozillaWindowClass',
+			'Chrome_WidgetWin_1',
+			'IEFrame'
+		].indexOf(this.activeWindow.className)) {
+			return true;
+		};
+		return false;
+	},
+	'Terminal' : function () {
+		if (~[
+			'ConsoleWindowClass',
+			'PuTTY',
+			'VTWin32'
+		].indexOf(this.activeWindow.className)) {
+			return true;
+		};
+		return false;
+	},
+	'Fiddler' : function () {
+		if (~[
+			'Fiddler - HTTP Debugging Proxy',
+		].indexOf(this.activeWindow.title)) {
+			return true;
+		};
+		return false;
+	},
+	'Editor' : function () {
+		if (~[
+			'TMeryForm.UnicodeClass',
+		].indexOf(this.activeWindow.className)) {
+			return true;
+		};
+		return false;
+	},
+	'WebStorm' : function () {
+		if (~[
+			'SunAwtFrame',
+		].indexOf(this.activeWindow.className)) {
+			return true;
+		};
+		return false;
+	},
+
+}).map('Browser', {
+
+	'Ctrl+S':function()( this.cancel().reset().send('F5') ),
+
+	'Ctrl+2':function()( this.cancel().reset().send('Ctrl+[S]') ),
+
+}).map('Terminal', {
+
+	// = <=> - (escape)
+	'Shift+minus' : function()( this.cancel().reset().send('Shift+[minus]') ),
+	'rshift+minus' : function()( this.cancel().reset().send('Shift+[minus]') ),
+	'minus' : function()( this.cancel().reset().send('[minus]') ),
+
+	// ^ <=> ~
+	'Shift+^' : function()( this.cancel().reset().send('[^]') ),
+	'rshift+^' : function()( this.cancel().reset().send('[^]') ),
+	'^' : function()( this.cancel().reset().send('Shift+[^]') ),
+
+}).map('Fiddler', {
+
+	'Ctrl+e':function()( this.cancel().reset().send('Ctrl+[E]') ),
+
+}).map('Editor', {
+/*
+	'Ctrl+s*2':function () {
+		var win = Window.select(/ - (Windows Internet Explorer|Mozilla Firefox|Google Chrome)$/);
+		for (let w in win) {
+			if (w.width < 300) {
+				continue;
+			};
+			w.sendKeys('Ctrl+R');
+		};
+	},
+*/
+	'Ctrl+1':function()( this.cancel().reset().send('Ctrl+j') ),
+}).map('IMEEnabled+', {
+
+	// IME ON
+	'Ctrl+o':function()( this.cancel().reset().send('.') ),
+	'Ctrl+r':function()( this.cancel().reset().send('-') ),
+	'slash':function()( this.cancel().reset().send('.') ),
+	'Ctrl+slash':function()( this.cancel().reset().send('/') ),
+
+}).map('!IMEEnabled+', {
+
+	// [] <=> {}
+	'Shift+[':function()( this.cancel().reset().send('[') ),
+	'Shift+]':function()( this.cancel().reset().send(']') ),
+	'rshift+[':function()( this.cancel().reset().send('[') ),
+	'rshift+]':function()( this.cancel().reset().send(']') ),
+	'[':function()( this.cancel().reset().send('Shift+[[]') ),
+	']':function()( this.cancel().reset().send('Shift+[]]') ),
+
+	// = <=> -
+	'Shift+minus' : function()( this.cancel().reset().send('[minus]') ),
+	'rshift+minus' : function()( this.cancel().reset().send('[minus]') ),
+	'minus' : function()( this.cancel().reset().send('Shift+[minus]') ),
+
+	// Shift+RShift+_ => $() left
+	'shift+rshift+backslash' : function()( this.cancel().reset().send(["$('')"]).send('left*2') ),
+
+}).map('Ctrl+', {
+
+	'D':function()( this.cancel().reset().send('Del') ),
+	'B':function()( this.cancel().reset().send('backspace') ),
+	'E':function()( this.cancel().reset().send('End') ),
+	'W':function()( this.cancel().reset().send('Home') ),
+
+	// move cursor
+	'J':function()( this.cancel().reset().send('Left') ),
+	'K':function()( this.cancel().reset().send('Down') ),
+	'L':function()( this.cancel().reset().send('Up') ),
+	';':function()( this.cancel().reset().send('Right') ),
+
+	':':function()( this.cancel().reset().send('Enter') ),
+
+	'_':function()( this.cancel().reset().send(['self']) ),
+
+	'1':function()( this.cancel().reset().send('f1') ),
+	'2':function()( this.cancel().reset().send('f2') ),
+	'3':function()( this.cancel().reset().send('f3') ),
+	'4':function()( this.cancel().reset().send('f4') ),
+	'5':function()( this.cancel().reset().send('f5') ),
+	'6':function()( this.cancel().reset().send('f6') ),
+	'7':function()( this.cancel().reset().send('f7') ),
+	'8':function()( this.cancel().reset().send('f8') ),
+	'9':function()( this.cancel().reset().send('f9') ),
+	'0':function()( this.cancel().reset().send('f10') ),
+
+}).map('Ctrl+Shift+', Ctrl_Shift).map({ 
+}).map('Ctrl+rshift+', Ctrl_Shift).map({ 
+
+	// @ <=> '
+	// ' <=> `
+	'Shift+@':function()( this.cancel().reset().send('[@]') ),
+	'Shift+7':function()( this.cancel().reset().send('Shift+[@]') ),
+	'rshift+@':function()( this.cancel().reset().send('[@]') ),
+	'rshift+7':function()( this.cancel().reset().send('Shift+[@]') ),
+	'@':function()( this.cancel().reset().send('Shift+7') ),
+
+	// \ => $
+	'backslash':function()( this.cancel().reset().send('Shift+4') ),
+
+	// IMEToggle
+	'lwin':function()( this.IMEToggle().cancel() ),
+	'LAlt':function()( this.IMEToggle().cancel() ),
+	'HanZen':function()( this.cancel().reset().send('[Alt]') ),
+
+	// ^ => >
+	'Ctrl+^' : function()( this.cancel().reset().send('[^]') ),
+	'^' : function()( this.cancel().reset().send('Shift+.') ),
+
+	// Launchy
+	'Shift*2' : function () {
+		try{
+			Process.create('"C:\\Program Files\\Launchy\\Launchy.exe" -show');
+		}catch(e){
+			println(e.toSource());
+		}
+	},
+
+	// ToggleIME
+	'Ctrl*2' : function () {
+		this.send('hanzen');
+	},
+
+	// IME on
+//	'RShift+Enter':function()( this.IMETurnOn().cancel().reset() ),
+	// IME off
+//	'LShift+Ctrl':function()( this.IMETurnOff().cancel().reset() ),
+}).remap('Shift+', shift_).remap('rshift+', shift_).map('WebStorm', {
+
+	'Ctrl+J':function()( this.cancel().reset().send('Ctrl+J') ),
+	'Ctrl+K':function()( this.cancel().reset().send('Ctrl+K') ),
+	'Ctrl+L':function()( this.cancel().reset().send('Ctrl+L') ),
+	'Ctrl+;':function()( this.cancel().reset().send('Ctrl+;') ),
+
+	'Ctrl+1':function()( this.cancel().reset().send('Shift+F10') ),
+	'Ctrl+W':function()( this.cancel().reset().send('Ctrl+W') ),
+	'Ctrl+Shift+Z':function()( this.cancel().reset().send('Ctrl+Shift+Z') ),
+	'Ctrl+Shift+J':function()( this.cancel().reset().send('Ctrl+Shift+J') ),
+
+	// Run test
+	'Ctrl+5' : function()( this.cancel().reset().send('Ctrl+F5') ),
+
+/*
+	'Ctrl+Shift+C':function() {
+		this.IMETurnOff().cancel().reset()
+			.send('[up][end][enter]')
+			.send(['console.log '])
+		;
+	},
+*/
+
+}).map({
+	'LShift+RShift' : function () {
+		this.cancel().reset();
+		Thread.create(function(){
+			var proc = Process.create('netsh interface ip show ipaddresses MBA-WLAN', 0);
+			var res = '';
+			while(!proc.eof){
+				res += proc.readln();
+			}
+			var ip = (res.match(/\d+\.\d+\.\d+\.\d+/)||[]).pop();
+			Clipboard.text = ip;
+			Main.notifyIcon.showInfo(ip,'ip addr');
+		});
+	}
+}).register();
+
+
+
+/*
+ DOWN / Code: 0x5b / ScanCode: 0x15b / Name: Left Windows
+   UP  / Code: 0x5b / ScanCode: 0x15b / Name: Left Windows
+
+Alias: break            / Code: 0x03 / ScanCode: 0x146 / Name: Break
+Alias: backspace        / Code: 0x08 / ScanCode: 0x00e / Name: Backspace
+Alias: back             / Code: 0x08 / ScanCode: 0x00e / Name: Backspace
+Alias: bs               / Code: 0x08 / ScanCode: 0x00e / Name: Backspace
+Alias: tab              / Code: 0x09 / ScanCode: 0x00f / Name: Tab
+Alias: enter            / Code: 0x0d / ScanCode: 0x01c / Name: Enter
+Alias: return           / Code: 0x0d / ScanCode: 0x01c / Name: Enter
+Alias: numenter         / Code: 0x0d / ScanCode: 0x11c / Name: Num Enter
+Alias: shift            / Code: 0x10 / ScanCode: 0x02a / Name: Shift
+Alias: control          / Code: 0x11 / ScanCode: 0x01d / Name: Ctrl
+Alias: ctrl             / Code: 0x11 / ScanCode: 0x01d / Name: Ctrl
+Alias: alt              / Code: 0x12 / ScanCode: 0x038 / Name: Alt
+Alias: pause            / Code: 0x13 / ScanCode: 0x000 / Name:
+Alias: capslock         / Code: 0x14 / ScanCode: 0x03a / Name: Caps Lock
+Alias: junja            / Code: 0x17 / ScanCode: 0x000 / Name:
+Alias: final            / Code: 0x18 / ScanCode: 0x000 / Name:
+Alias: escape           / Code: 0x1b / ScanCode: 0x001 / Name: Esc
+Alias: esc              / Code: 0x1b / ScanCode: 0x001 / Name: Esc
+Alias: henkan           / Code: 0x1c / ScanCode: 0x079 / Name: 変換
+Alias: convert          / Code: 0x1c / ScanCode: 0x079 / Name: 変換
+Alias: muhenkan         / Code: 0x1d / ScanCode: 0x07b / Name: 無変換
+Alias: noconvert        / Code: 0x1d / ScanCode: 0x07b / Name: 無変換
+Alias: accept           / Code: 0x1e / ScanCode: 0x000 / Name:
+Alias: modechange       / Code: 0x1f / ScanCode: 0x000 / Name:
+Alias: space            / Code: 0x20 / ScanCode: 0x039 / Name: Space
+Alias: pageup           / Code: 0x21 / ScanCode: 0x149 / Name: Page Up
+Alias: pgup             / Code: 0x21 / ScanCode: 0x149 / Name: Page Up
+Alias: pagedown         / Code: 0x22 / ScanCode: 0x151 / Name: Page Down
+Alias: pgdn             / Code: 0x22 / ScanCode: 0x151 / Name: Page Down
+Alias: end              / Code: 0x23 / ScanCode: 0x14f / Name: End
+Alias: home             / Code: 0x24 / ScanCode: 0x147 / Name: Home
+Alias: left             / Code: 0x25 / ScanCode: 0x14b / Name: Left
+Alias: up               / Code: 0x26 / ScanCode: 0x148 / Name: Up
+Alias: right            / Code: 0x27 / ScanCode: 0x14d / Name: Right
+Alias: down             / Code: 0x28 / ScanCode: 0x150 / Name: Down
+Alias: select           / Code: 0x29 / ScanCode: 0x000 / Name:
+Alias: print            / Code: 0x2a / ScanCode: 0x000 / Name:
+Alias: execute          / Code: 0x2b / ScanCode: 0x000 / Name:
+Alias: printscreen      / Code: 0x2c / ScanCode: 0x054 / Name: Sys Req
+Alias: prtsc            / Code: 0x2c / ScanCode: 0x054 / Name: Sys Req
+Alias: insert           / Code: 0x2d / ScanCode: 0x152 / Name: Insert
+Alias: ins              / Code: 0x2d / ScanCode: 0x152 / Name: Insert
+Alias: delete           / Code: 0x2e / ScanCode: 0x153 / Name: Delete
+Alias: del              / Code: 0x2e / ScanCode: 0x153 / Name: Delete
+Alias: numdelete        / Code: 0x2e / ScanCode: 0x053 / Name: Num Del
+Alias: numdel           / Code: 0x2e / ScanCode: 0x053 / Name: Num Del
+Alias: help             / Code: 0x2f / ScanCode: 0x000 / Name:
+Alias: lwin             / Code: 0x5b / ScanCode: 0x15b / Name: Left Windows
+Alias: rwin             / Code: 0x5c / ScanCode: 0x15c / Name: Right Windows
+Alias: app              / Code: 0x5d / ScanCode: 0x15d / Name: Application
+Alias: sleep            / Code: 0x5f / ScanCode: 0x05f / Name:
+Alias: num0             / Code: 0x60 / ScanCode: 0x052 / Name: Num 0
+Alias: numinsert        / Code: 0x2d / ScanCode: 0x052 / Name: Num 0
+Alias: numins           / Code: 0x2d / ScanCode: 0x052 / Name: Num 0
+Alias: num1             / Code: 0x61 / ScanCode: 0x04f / Name: Num 1
+Alias: numend           / Code: 0x23 / ScanCode: 0x04f / Name: Num 1
+Alias: num2             / Code: 0x62 / ScanCode: 0x050 / Name: Num 2
+Alias: numdown          / Code: 0x28 / ScanCode: 0x050 / Name: Num 2
+Alias: num3             / Code: 0x63 / ScanCode: 0x051 / Name: Num 3
+Alias: numpagedown      / Code: 0x22 / ScanCode: 0x051 / Name: Num 3
+Alias: numpgdn          / Code: 0x22 / ScanCode: 0x051 / Name: Num 3
+Alias: num4             / Code: 0x64 / ScanCode: 0x04b / Name: Num 4
+Alias: numleft          / Code: 0x25 / ScanCode: 0x04b / Name: Num 4
+Alias: num5             / Code: 0x65 / ScanCode: 0x04c / Name: Num 5
+Alias: num6             / Code: 0x66 / ScanCode: 0x04d / Name: Num 6
+Alias: numright         / Code: 0x27 / ScanCode: 0x04d / Name: Num 6
+Alias: num7             / Code: 0x67 / ScanCode: 0x047 / Name: Num 7
+Alias: numhome          / Code: 0x24 / ScanCode: 0x047 / Name: Num 7
+Alias: num8             / Code: 0x68 / ScanCode: 0x048 / Name: Num 8
+Alias: numup            / Code: 0x26 / ScanCode: 0x048 / Name: Num 8
+Alias: num9             / Code: 0x69 / ScanCode: 0x049 / Name: Num 9
+Alias: numpageup        / Code: 0x21 / ScanCode: 0x049 / Name: Num 9
+Alias: numpgup          / Code: 0x21 / ScanCode: 0x049 / Name: Num 9
+Alias: nummulti         / Code: 0x6a / ScanCode: 0x037 / Name: Num *
+Alias: numplus          / Code: 0x6b / ScanCode: 0x04e / Name: Num +
+Alias: numminus         / Code: 0x6d / ScanCode: 0x04a / Name: Num -
+Alias: numdot           / Code: 0x6e / ScanCode: 0x053 / Name: Num Del
+Alias: numdivide        / Code: 0x6f / ScanCode: 0x135 / Name: Num /
+Alias: numdiv           / Code: 0x6f / ScanCode: 0x135 / Name: Num /
+Alias: f1               / Code: 0x70 / ScanCode: 0x03b / Name: F1
+Alias: f2               / Code: 0x71 / ScanCode: 0x03c / Name: F2
+Alias: f3               / Code: 0x72 / ScanCode: 0x03d / Name: F3
+Alias: f4               / Code: 0x73 / ScanCode: 0x03e / Name: F4
+Alias: f5               / Code: 0x74 / ScanCode: 0x03f / Name: F5
+Alias: f6               / Code: 0x75 / ScanCode: 0x040 / Name: F6
+Alias: f7               / Code: 0x76 / ScanCode: 0x041 / Name: F7
+Alias: f8               / Code: 0x77 / ScanCode: 0x042 / Name: F8
+Alias: f9               / Code: 0x78 / ScanCode: 0x043 / Name: F9
+Alias: f10              / Code: 0x79 / ScanCode: 0x044 / Name: F10
+Alias: f11              / Code: 0x7a / ScanCode: 0x057 / Name: F11
+Alias: f12              / Code: 0x7b / ScanCode: 0x058 / Name: F12
+Alias: f13              / Code: 0x7c / ScanCode: 0x064 / Name:
+Alias: f14              / Code: 0x7d / ScanCode: 0x065 / Name:
+Alias: f15              / Code: 0x7e / ScanCode: 0x066 / Name:
+Alias: f16              / Code: 0x7f / ScanCode: 0x067 / Name:
+Alias: f17              / Code: 0x80 / ScanCode: 0x068 / Name:
+Alias: f18              / Code: 0x81 / ScanCode: 0x069 / Name:
+Alias: f19              / Code: 0x82 / ScanCode: 0x06a / Name:
+Alias: f20              / Code: 0x83 / ScanCode: 0x06b / Name:
+Alias: f21              / Code: 0x84 / ScanCode: 0x06c / Name:
+Alias: f22              / Code: 0x85 / ScanCode: 0x06d / Name:
+Alias: f23              / Code: 0x86 / ScanCode: 0x06e / Name:
+Alias: f24              / Code: 0x87 / ScanCode: 0x076 / Name:
+Alias: numlock          / Code: 0x90 / ScanCode: 0x145 / Name: Num Lock
+Alias: scrolllock       / Code: 0x91 / ScanCode: 0x046 / Name: Scroll Lock
+Alias: lshift           / Code: 0xa0 / ScanCode: 0x02a / Name: Shift
+Alias: rshift           / Code: 0xa1 / ScanCode: 0x136 / Name:
+Alias: lcontrol         / Code: 0xa2 / ScanCode: 0x01d / Name: Ctrl
+Alias: lctrl            / Code: 0xa2 / ScanCode: 0x01d / Name: Ctrl
+Alias: rcontrol         / Code: 0xa3 / ScanCode: 0x01d / Name: Ctrl
+Alias: rctrl            / Code: 0xa3 / ScanCode: 0x11d / Name: Right Control
+Alias: lalt             / Code: 0xa4 / ScanCode: 0x038 / Name: Alt
+Alias: ralt             / Code: 0xa5 / ScanCode: 0x138 / Name: Right Alt
+Alias: browser_back     / Code: 0xa6 / ScanCode: 0x06a / Name:
+Alias: browser_forward  / Code: 0xa7 / ScanCode: 0x069 / Name:
+Alias: browser_refresh  / Code: 0xa8 / ScanCode: 0x067 / Name:
+Alias: browser_stop     / Code: 0xa9 / ScanCode: 0x068 / Name:
+Alias: browser_search   / Code: 0xaa / ScanCode: 0x065 / Name:
+Alias: browser_favorite / Code: 0xab / ScanCode: 0x066 / Name:
+Alias: browser_home     / Code: 0xac / ScanCode: 0x032 / Name: M
+Alias: volume_mute      / Code: 0xad / ScanCode: 0x020 / Name: D
+Alias: volume_down      / Code: 0xae / ScanCode: 0x02e / Name: C
+Alias: volume_up        / Code: 0xaf / ScanCode: 0x030 / Name: B
+Alias: media_next       / Code: 0xb0 / ScanCode: 0x019 / Name: P
+Alias: media_prev       / Code: 0xb1 / ScanCode: 0x010 / Name: Q
+Alias: media_stop       / Code: 0xb2 / ScanCode: 0x024 / Name: J
+Alias: media_play       / Code: 0xb3 / ScanCode: 0x022 / Name: G
+Alias: launch_mail      / Code: 0xb4 / ScanCode: 0x06c / Name:
+Alias: launch_media     / Code: 0xb5 / ScanCode: 0x06d / Name:
+Alias: launch_app1      / Code: 0xb6 / ScanCode: 0x06b / Name:
+Alias: launch_app2      / Code: 0xb7 / ScanCode: 0x021 / Name: F
+Alias: colon            / Code: 0xba / ScanCode: 0x028 / Name: :
+Alias: semicolon        / Code: 0xbb / ScanCode: 0x027 / Name: ;
+Alias: comma            / Code: 0xbc / ScanCode: 0x033 / Name: ,
+Alias: minus            / Code: 0xbd / ScanCode: 0x00c / Name: -
+Alias: period           / Code: 0xbe / ScanCode: 0x034 / Name: .
+Alias: slash            / Code: 0xbf / ScanCode: 0x035 / Name: /
+Alias: atmark           / Code: 0xc0 / ScanCode: 0x01a / Name: @
+Alias: at               / Code: 0xc0 / ScanCode: 0x01a / Name: @
+Alias: backslash        / Code: 0xe2 / ScanCode: 0x073 / Name: \
+Alias: kana             / Code: 0xf2 / ScanCode: 0x070 / Name: ひらがな
+Alias: hanzen           / Code: 0xf3 / ScanCode: 0x029 / Name: 半角/全角
+*/
