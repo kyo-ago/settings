@@ -379,5 +379,29 @@
 				KeyCode::DELETE
 			</autogen>
 		</item>
+		<item>
+			<name>Ctrl+Arrow</name>
+			<identifier>private_ctrl_arrow</identifier>
+			<autogen>
+				__KeyToKey__
+				KeyCode::CURSOR_LEFT, ModifierFlag::COMMAND_L,
+				KeyCode::CURSOR_LEFT, ModifierFlag::OPTION_R
+			</autogen>
+			<autogen>
+				__KeyToKey__
+				KeyCode::CURSOR_RIGHT, ModifierFlag::COMMAND_L,
+				KeyCode::CURSOR_RIGHT, ModifierFlag::OPTION_R
+			</autogen>
+			<autogen>
+				__KeyToKey__
+				KeyCode::CURSOR_UP, ModifierFlag::COMMAND_L,
+				KeyCode::PAGEUP
+			</autogen>
+			<autogen>
+				__KeyToKey__
+				KeyCode::CURSOR_DOWN, ModifierFlag::COMMAND_L,
+				KeyCode::PAGEDOWN
+			</autogen>
+		</item>
 	</item>
 </root>
