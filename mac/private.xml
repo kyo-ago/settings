@@ -402,6 +402,26 @@
 				KeyCode::CURSOR_DOWN, ModifierFlag::COMMAND_L,
 				KeyCode::PAGEDOWN
 			</autogen>
+			<autogen>
+				__KeyToKey__
+				KeyCode::Z, ModifierFlag::SHIFT_L | ModifierFlag::SHIFT_R | ModifierFlag::NONE,
+				KeyCode::CURSOR_LEFT, ModifierFlag::COMMAND_L | ModifierFlag::OPTION_R
+			</autogen>
+			<autogen>
+				__KeyToKey__
+				KeyCode::JIS_UNDERSCORE, ModifierFlag::SHIFT_L | ModifierFlag::SHIFT_R | ModifierFlag::NONE,
+				KeyCode::CURSOR_RIGHT, ModifierFlag::COMMAND_L | ModifierFlag::OPTION_R
+			</autogen>
+			<autogen>
+				__KeyToKey__
+				KeyCode::Z, ModifierFlag::SHIFT_L | ModifierFlag::SHIFT_R | ModifierFlag::COMMAND_L,
+				KeyCode::TAB, ModifierFlag::COMMAND_L | ModifierFlag::SHIFT_L
+			</autogen>
+			<autogen>
+				__KeyToKey__
+				KeyCode::JIS_UNDERSCORE, ModifierFlag::SHIFT_L | ModifierFlag::SHIFT_R | ModifierFlag::COMMAND_L,
+				KeyCode::TAB, ModifierFlag::COMMAND_L
+			</autogen>
 		</item>
 	</item>
 </root>
